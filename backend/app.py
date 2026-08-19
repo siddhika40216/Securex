@@ -1,75 +1,3 @@
-# from fastapi import FastAPI
-# from fastapi.middleware.cors import CORSMiddleware
-# from pydantic import BaseModel
-
-# app = FastAPI()
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["http://localhost:3000"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-
-# class CreditRequest(BaseModel):
-#     monthlyIncome: float
-#     employmentType: str
-#     loanAmount: float
-
-
-# @app.get("/")
-# def home():
-#     return {"message": "Credit Scoring API is running"}
-
-
-# @app.post("/predict")
-# def predict(data: CreditRequest):
-
-#     score = 650
-
-#     if data.monthlyIncome >= 100000:
-#         score += 100
-#     elif data.monthlyIncome >= 70000:
-#         score += 70
-#     elif data.monthlyIncome >= 50000:
-#         score += 50
-#     elif data.monthlyIncome < 30000:
-#         score -= 50
-
-#     if data.loanAmount > data.monthlyIncome * 10:
-#         score -= 80
-#     elif data.loanAmount > data.monthlyIncome * 5:
-#         score -= 40
-
-#     if data.employmentType == "Business Owner":
-#         score += 20
-#     elif data.employmentType == "Self Employed":
-#         score += 10
-#     elif data.employmentType == "Freelancer":
-#         score -= 10
-
-#     score = max(300, min(score, 850))
-
-#     if score >= 740:
-#         risk = "Low Risk"
-#     elif score >= 670:
-#         risk = "Medium Risk"
-#     else:
-#         risk = "High Risk"
-
-#     recommendation = int(data.monthlyIncome * 10)
-
-#     return {
-#         "score": score,
-#         "risk": risk,
-#         "confidence": 94.8,
-#         "recommendation": recommendation
-#     }
-
-
-
-
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -77,6 +5,21 @@ import pandas as pd
 import joblib
 import shap
 
+import os
+import requests
+
+
+MODEL_URL = "https://huggingface.co/siddhi2026/securex-credit-model/resolve/main/credit_model.pkl"
+MODEL_PATH = "credit_model.pkl"
+
+if not os.path.exists(MODEL_PATH):
+    response = requests.get(MODEL_URL)
+    response.raise_for_status()
+
+    with open(MODEL_PATH, "wb") as f:
+        f.write(response.content)
+
+model = joblib.load(MODEL_PATH)
 
 app = FastAPI()
 
@@ -97,7 +40,6 @@ app.add_middleware(
 # Load trained model
 # --------------------------------------------------
 
-model = joblib.load("credit_model.pkl")
 imputer = joblib.load("imputer.pkl")
 
 explainer = shap.TreeExplainer(model)
