@@ -42,7 +42,7 @@ app.add_middleware(
 
 imputer = joblib.load("imputer.pkl")
 
-explainer = shap.TreeExplainer(model)
+# explainer = shap.TreeExplainer(model)
 
 
 # --------------------------------------------------
