@@ -4,7 +4,7 @@ import { Navbar } from '@/components/navbar'
 import { GlassCard } from '@/components/glass-card'
 import { GradientButton } from '@/components/gradient-button'
 import { motion } from 'framer-motion'
-import { mockUserData, mockCreditFactors } from '@/lib/mock-data'
+import { useEffect, useState } from 'react'
 import { Mail, MapPin, Calendar, Shield, Download, Edit2, LogOut } from 'lucide-react'
 
 const itemVariants = {
@@ -17,6 +17,15 @@ const itemVariants = {
 }
 
 export default function ProfilePage() {
+const [creditResult, setCreditResult] = useState<any>(null)
+
+useEffect(() => {
+  const savedResult = localStorage.getItem("creditResult")
+
+  if (savedResult) {
+    setCreditResult(JSON.parse(savedResult))
+  }
+}, [])
   return (
     <>
       <Navbar />
@@ -28,54 +37,65 @@ export default function ProfilePage() {
             <p className="text-foreground/60">Manage your account and view your credit report</p>
           </motion.div>
 
-          {/* Profile Info Card */}
-          <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mb-6">
-            <GlassCard className="p-8">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-3xl font-bold mb-2">{mockUserData.name}</h2>
-                  <div className="space-y-2 text-sm text-foreground/60">
-                    <div className="flex items-center gap-2">
-                      <Mail size={16} />
-                      {mockUserData.email}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar size={16} />
-                      Account Age: {mockUserData.accountAge}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-3 mt-6 md:mt-0">
-                  <GradientButton variant="outline" size="sm">
-                    <Edit2 size={16} className="mr-2" /> Edit Profile
-                  </GradientButton>
-                  <GradientButton variant="outline" size="sm">
-                    <LogOut size={16} className="mr-2" /> Sign Out
-                  </GradientButton>
-                </div>
-              </div>
-              <div className="border-t border-white/10 pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <p className="text-foreground/60 text-sm mb-2">Current Credit Score</p>
-                    <p className="text-2xl font-bold text-primary">{mockUserData.creditScore}</p>
-                  </div>
-                  <div>
-                    <p className="text-foreground/60 text-sm mb-2">Risk Assessment</p>
-                    <div className="flex items-center gap-2">
-                      <Shield size={20} className="text-green-400" />
-                      <span className="text-lg font-semibold">{mockUserData.riskLevel}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-foreground/60 text-sm mb-2">Approval Rate</p>
-                    <p className="text-2xl font-bold">{mockUserData.approvalRate}%</p>
-                  </div>
-                </div>
-              </div>
-            </GlassCard>
-          </motion.div>
 
+        <GlassCard className="p-8">
+  <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+
+    <div>
+      <h2 className="text-3xl font-bold mb-2">
+        Credit Assessment Profile
+      </h2>
+
+      <p className="text-sm text-foreground/60">
+        Your latest AI-powered credit assessment
+      </p>
+    </div>
+
+  </div>
+
+  <div className="border-t border-white/10 pt-6">
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div>
+        <p className="text-foreground/60 text-sm mb-2">
+          Current Credit Score
+        </p>
+
+        <p className="text-2xl font-bold text-primary">
+          {creditResult?.score ?? "Not available"}
+        </p>
+      </div>
+
+      <div>
+        <p className="text-foreground/60 text-sm mb-2">
+          Risk Assessment
+        </p>
+
+        <div className="flex items-center gap-2">
+          <Shield size={20} className="text-green-400" />
+
+          <span className="text-lg font-semibold">
+            {creditResult?.risk ?? "Not available"}
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-foreground/60 text-sm mb-2">
+          Model Confidence
+        </p>
+
+        <p className="text-2xl font-bold">
+          {creditResult
+            ? `${creditResult.confidence}%`
+            : "Not available"}
+        </p>
+      </div>
+
+    </div>
+  </div>
+</GlassCard>
           {/* Credit Report */}
           <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mb-6">
             <GlassCard className="p-8">
@@ -90,38 +110,81 @@ export default function ProfilePage() {
                 <div>
                   <h4 className="font-semibold mb-4">Credit Analysis Breakdown</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {mockCreditFactors.map((factor, index) => (
-                      <div key={index} className="p-4 rounded-lg bg-white/5 border border-white/10">
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="font-medium">{factor.label}</span>
-                          <span className="text-lg font-bold text-primary">{factor.value}%</span>
-                        </div>
-                        <div className="w-full bg-background/50 rounded-full h-2 mb-2">
-                          <div
-                            className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full"
-                            style={{ width: `${factor.value}%` }}
-                          />
-                        </div>
-                        <p className="text-xs text-foreground/50">Weight in score: {factor.weight}%</p>
-                      </div>
-                    ))}
+                    {creditResult?.feature_importance?.map(
+                      (factor: any, index: number) => (
+                        <div
+                          key={index}
+                          className="p-4 rounded-lg bg-white/5 border border-white/10"
+                        >
+                          <div className="flex justify-between items-center mb-3">
+
+                            <span className="font-medium">
+                              {factor.feature}
+                            </span>
+
+                            <span className="text-lg font-bold text-primary">
+                              {(factor.importance * 100).toFixed(2)}%
+                            </span>
+
+                          </div>
+
+                          <div className="w-full bg-background/50 rounded-full h-2 mb-2">
+
+                            <div
+                              className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full"
+                              style={{
+                                width: `${Math.min(
+                                  factor.importance * 100,
+                                  100
+                                )}%`,
+                              }}
+                            />
+
+      </div>
+
+      <p className="text-xs text-foreground/50">
+        Model feature importance
+      </p>
+
+    </div>
+  )
+)}
                   </div>
                 </div>
 
-                <div className="border-t border-white/10 pt-6">
-                  <h4 className="font-semibold mb-4">Key Recommendations</h4>
-                  <div className="space-y-3">
-                    <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                      <p className="text-sm text-green-400">Maintain your excellent payment history - this is your strongest factor</p>
-                    </div>
-                    <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                      <p className="text-sm text-blue-400">Your credit utilization is optimal at 28% - keep it below 30% for best results</p>
-                    </div>
-                    <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                      <p className="text-sm text-purple-400">Consider diversifying your credit mix with a secured credit card</p>
-                    </div>
-                  </div>
-                </div>
+              <div className="border-t border-white/10 pt-6">
+  <h4 className="font-semibold mb-4">
+    AI Credit Analysis
+  </h4>
+
+  <div className="space-y-3">
+    {creditResult?.shap_explanation
+      ?.slice(0, 5)
+      .map((item: any, index: number) => (
+        <div
+          key={index}
+          className={`p-4 rounded-lg border ${
+            item.impact >= 0
+              ? "bg-green-500/10 border-green-500/30"
+              : "bg-red-500/10 border-red-500/30"
+          }`}
+        >
+          <p
+            className={`text-sm ${
+              item.impact >= 0
+                ? "text-green-400"
+                : "text-red-400"
+            }`}
+          >
+            <strong>{item.feature}</strong>{" "}
+            {item.impact >= 0
+              ? "has a positive impact on the prediction."
+              : "has a negative impact on the prediction."}
+          </p>
+        </div>
+      ))}
+  </div>
+</div>
               </div>
             </GlassCard>
           </motion.div>
