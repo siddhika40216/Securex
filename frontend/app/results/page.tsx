@@ -43,16 +43,30 @@ export default function ResultsPage() {
   const [financialData, setFinancialData] =
   useState<FinancialData | null>(null);
 
+  // useEffect(() => {
+  //   const savedResult = localStorage.getItem("creditResult");
+  //   const savedFinancialData = localStorage.getItem("financialData");
+  //   if (savedResult) {
+  //     setResult(JSON.parse(savedResult));
+  //   }
+  //   if (savedFinancialData) {
+  //   setFinancialData(JSON.parse(savedFinancialData));
+  // }
+  // }, []);
   useEffect(() => {
-    const savedResult = localStorage.getItem("creditResult");
-    const savedFinancialData = localStorage.getItem("financialData");
-    if (savedResult) {
-      setResult(JSON.parse(savedResult));
-    }
-    if (savedFinancialData) {
+  const savedResult = localStorage.getItem("creditResult");
+
+  if (savedResult) {
+    setResult(JSON.parse(savedResult));
+  }
+
+  // Financial data only if it belongs to the current assessment
+  const savedFinancialData = localStorage.getItem("financialData");
+
+  if (savedFinancialData) {
     setFinancialData(JSON.parse(savedFinancialData));
   }
-  }, []);
+}, []);
 
   if (!result) {
     return (

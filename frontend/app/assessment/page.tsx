@@ -27,6 +27,9 @@ export default function AssessmentPage() {
   
   async function handleAnalyze() {
   try {
+    
+      localStorage.removeItem("financialData");
+    
     // 1. First upload bank + UPI files
     if (formData.bankStatement && formData.upiFile) {
       const uploadData = new FormData();
@@ -54,10 +57,17 @@ export default function AssessmentPage() {
         JSON.stringify(financialData)
       );
     }
-    const savedFinancialData = localStorage.getItem("financialData");
+  //   const savedFinancialData = localStorage.getItem("financialData");
 
-    const upiBehaviourScore = savedFinancialData
-  ? JSON.parse(savedFinancialData)?.upi_features?.upi_behaviour_score || 0
+  //   const upiBehaviourScore = savedFinancialData
+  // ? JSON.parse(savedFinancialData)?.upi_features?.upi_behaviour_score || 0
+  // : 0;
+  const upiBehaviourScore = formData.upiFile
+  ? Number(
+      JSON.parse(
+        localStorage.getItem("financialData") || "{}"
+      )?.upi_features?.upi_behaviour_score || 0
+    )
   : 0;
 
     // 2. Send credit information to ML model
@@ -244,6 +254,41 @@ export default function AssessmentPage() {
                   }
                   className="w-full rounded-lg bg-black/20 border border-white/10 p-3"
                 />
+                <div>
+                  <label className="block mb-2 text-sm">
+                    Bank Statement
+                  </label>
+
+                  <input
+                    type="file"
+                    accept=".csv,.pdf"
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        bankStatement: e.target.files?.[0] || null,
+                      })
+                    }
+                    className="w-full rounded-lg bg-black/20 border border-white/10 p-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm">
+                    UPI Statement
+                  </label>
+
+                  <input
+                    type="file"
+                    accept=".csv,.pdf"
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        upiFile: e.target.files?.[0] || null,
+                      })
+                    }
+                    className="w-full rounded-lg bg-black/20 border border-white/10 p-3"
+                  />
+                </div>
               </div>
 
             </div>
